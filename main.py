@@ -47,13 +47,13 @@ class AlgoritmoGenetico:
             for indiv in poblacion_nueva:
                 self.poblacion.append(indiv)
             self.ordenar_poblacion_por_aptitud()
-            print("Poblacion antes de la poda")
+            #Poda hasta tener el numero de individuos iniciales
+            self.poda()
+            print(f'Mejor individuo: {self.poblacion[0]}')
+            print(f'Peor individuo: {self.poblacion[self.n_individuos-1]}')
+            print(f'Generación {aux+1}')
             for indiv in self.poblacion:
                 print(indiv)
-
-
-            #Acá va la poda
-            
             aux+=1
 
     def primera_gen(self):
@@ -148,25 +148,15 @@ class AlgoritmoGenetico:
         self.poblacion.sort(key=lambda aptitud: aptitud['aptitud'])
 
     def poda(self):
-        self.ordenar_poblacion()
-        for indiv in self.poblacion:
-            print(indiv)
         while len(self.poblacion) != self.n_individuos:
             self.poblacion.pop()
-        poblacion_copy = self.poblacion.copy()
-        self.mejor_individuo.append(poblacion_copy[0].ganancia)
-        self.peor_individuo.append(
-            poblacion_copy[self.n_individuos-1].ganancia)
 
     def encontrar_pasajero(self, target_id):
         for pasajero in self.pasajeros:
             if pasajero.id == target_id:
                 return pasajero
 
-    # [0 ,1 ,2 ,3 ,
-    # 4 ,5 ,6 ,7 ,
-    # 8 ,9 ,10,11,
-    # 12,13,14,15]
+    
     def calcular_y(self, individuo):
         suma_y = 0
         suma_masa = 0
@@ -177,58 +167,39 @@ class AlgoritmoGenetico:
             list_valores_en_y.append({'y':valor_en_y,'valores':[aux_fila,aux_fila+1,aux_fila+2,aux_fila+3]})
             aux_fila+=4
             valor_en_y+=80
-        # y40 = {'y': 40, 'valores': [0, 1, 2, 3]}
-        # y120 = {'y': 120, 'valores': [4, 5, 6, 7]}
-        # y200 = {'y': 200, 'valores': [8, 9, 10, 11]}
-        # y280 = {'y': 280, 'valores': [12, 13, 14, 15]}
         for index, id_pasaj in enumerate(individuo):
             gen_masa=self.encontrar_pasajero(id_pasaj).masa
             for valores in list_valores_en_y:
                 if index in valores['valores']:
                     suma_y += (valores['y']*gen_masa)
                     suma_masa += gen_masa
-        # for index, id_pasaj in enumerate(individuo):
-        #     gen_masa=self.encontrar_pasajero(id_pasaj).masa
-        #     if index in y40.get('valores'):
-        #         suma_y += (gen_masa*y40.get('y'))
-        #         suma_masa += gen_masa
-        #     elif index in y120.get('valores'):
-        #         suma_y += (gen_masa*y120.get('y'))
-        #         suma_masa += gen_masa
-        #     elif index in y200.get('valores'):
-        #         suma_y += (gen_masa*y200.get('y'))
-        #         suma_masa += gen_masa
-        #     elif index in y280.get('valores'):
-        #         suma_y += (gen_masa*y280.get('y'))
-        #         suma_masa += gen_masa
-        return round(suma_y/suma_masa,1)
-
-    def calcular_x(self,individuo):
-        x40={'x':40,'valores':[0,4,8,12]}
-        x120={'x':120,'valores':[1,5,9,13]}
-        x200={'x':200+self.separacion_asientos,'valores':[2,6,10,14]}
-        x280={'x':280+self.separacion_asientos,'valores':[3,7,11,15]}
         
-        suma_x=0
-        suma_masa=0
-        for index,id_pasaj in enumerate(individuo):
+        return round(suma_y/suma_masa,1)
+    #[0,4,8,12]
+    #[1,5,9,13]
+    #[2,6,10,14]
+    #[3,7,11,15]
+    def calcular_x(self,individuo):
+        suma_x = 0
+        suma_masa = 0
+        list_valores_en_x = [{'x':40,'valores':[]},{'x':120,'valores':[]},{'x':250,'valores':[]},{'x':330,'valores':[]}]
+        aux_fila=0
+        for _ in range(self.n_filas):
+            for i in range(4):
+                list_valores_en_x[i]['valores'].append(aux_fila)
+                aux_fila+=1
+        for data in list_valores_en_x:
+            print(data)
+        for index, id_pasaj in enumerate(individuo):
             gen_masa=self.encontrar_pasajero(id_pasaj).masa
-            if index in x40.get('valores'):
-                suma_x+=(gen_masa*x40.get('x'))
-                suma_masa+=gen_masa
-            elif index in x120.get('valores'):
-                suma_x+=(gen_masa*x120.get('x'))
-                suma_masa+=gen_masa
-            elif index in x200.get('valores'):
-                suma_x+=(gen_masa*x200.get('x'))
-                suma_masa+=gen_masa
-            elif index in x280.get('valores'):
-                suma_x+=(gen_masa*x280.get('x'))
-                suma_masa+=gen_masa
+            for valores in list_valores_en_x:
+                if index in valores['valores']:
+                    suma_x += (valores['x']*gen_masa)
+                    suma_masa += gen_masa
         return round(suma_x/suma_masa,1)
             
 if __name__ == '__main__':
-    n_filas=4 #Valor constante definido en la planeación de la resolución
+    n_filas=4 #Valor cambiable
     numero_pasajeros=4*n_filas
     numero_generaciones=1
     separacion_asientos=50
