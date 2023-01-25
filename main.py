@@ -3,11 +3,14 @@ import random
 
 
 class AlgoritmoGenetico:
-    def __init__(self, pasajeros, n_individuos,n_generaciones):
+    def __init__(self, pasajeros, n_individuos,n_generaciones,distancia_entre_asientos,aptitud_deseada,n_filas):
         # Variables que se pueden modificar
         self.pasajeros = pasajeros
         self.n_individuos = n_individuos
         self.n_generaciones = n_generaciones
+        self.diatancia_entre_asientos=distancia_entre_asientos
+        self.aptitud_deseada=aptitud_deseada
+        self.n_filas=n_filas
         self.n_mutaciones=2
         self.k = 3
         self.ancho_moto = 150
@@ -157,24 +160,37 @@ class AlgoritmoGenetico:
     def calcular_aptitud_y(self, individuo):
         suma_y = 0
         suma_masa = 0
-        y40 = {'y': 40, 'valores': [0, 1, 2, 3]}
-        y120 = {'y': 120, 'valores': [4, 5, 6, 7]}
-        y200 = {'y': 200, 'valores': [8, 9, 10, 11]}
-        y280 = {'y': 280, 'valores': [12, 13, 14, 15]}
+        list_valores_en_y = []
+        aux_fila=0
+        valor_en_y=40
+        for _ in range(self.n_filas):
+            list_valores_en_y.append({'y':valor_en_y,'valores':[aux_fila,aux_fila+1,aux_fila+2,aux_fila+3]})
+            aux_fila+=4
+            valor_en_y+=80
+        # y40 = {'y': 40, 'valores': [0, 1, 2, 3]}
+        # y120 = {'y': 120, 'valores': [4, 5, 6, 7]}
+        # y200 = {'y': 200, 'valores': [8, 9, 10, 11]}
+        # y280 = {'y': 280, 'valores': [12, 13, 14, 15]}
         for index, id_pasaj in enumerate(individuo):
             gen_masa=self.encontrar_pasajero(id_pasaj).masa
-            if index in y40.get('valores'):
-                suma_y += (gen_masa*y40.get('y'))
-                suma_masa += gen_masa
-            elif index in y120.get('valores'):
-                suma_y += (gen_masa*y120.get('y'))
-                suma_masa += gen_masa
-            elif index in y200.get('valores'):
-                suma_y += (gen_masa*y200.get('y'))
-                suma_masa += gen_masa
-            elif index in y280.get('valores'):
-                suma_y += (gen_masa*y280.get('y'))
-                suma_masa += gen_masa
+            for valores in list_valores_en_y:
+                if index in valores['valores']:
+                    suma_y += (valores['y']*gen_masa)
+                    suma_masa += gen_masa
+        # for index, id_pasaj in enumerate(individuo):
+        #     gen_masa=self.encontrar_pasajero(id_pasaj).masa
+        #     if index in y40.get('valores'):
+        #         suma_y += (gen_masa*y40.get('y'))
+        #         suma_masa += gen_masa
+        #     elif index in y120.get('valores'):
+        #         suma_y += (gen_masa*y120.get('y'))
+        #         suma_masa += gen_masa
+        #     elif index in y200.get('valores'):
+        #         suma_y += (gen_masa*y200.get('y'))
+        #         suma_masa += gen_masa
+        #     elif index in y280.get('valores'):
+        #         suma_y += (gen_masa*y280.get('y'))
+        #         suma_masa += gen_masa
         return round(suma_y/suma_masa,1)
 
     def calcular_aptitud_x(self,individuo):
@@ -205,6 +221,9 @@ if __name__ == '__main__':
     n_filas=4 #Valor constante definido en la planeación de la resolución
     numero_pasajeros=4*n_filas
     numero_generaciones=1
+    #Se calcula tomando en cuenta la distancia entre pajeros (asientos)
+    distancia_entre_asientos=80
+    aptitud_deseada=((distancia_entre_asientos*n_filas)/2)
     pasajeros=crear_pasajeros(numero_pasajeros) 
-    AG=AlgoritmoGenetico(pasajeros, numero_pasajeros,numero_generaciones)
+    AG=AlgoritmoGenetico(pasajeros, numero_pasajeros,numero_generaciones,distancia_entre_asientos,aptitud_deseada,n_filas)
     
