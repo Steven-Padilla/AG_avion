@@ -1,16 +1,17 @@
 from Helper import crear_pasajeros,generar_rango_cruza,arr_numeros,llenar_resultado
 import random
+import math
 
 
 class AlgoritmoGenetico:
-    def __init__(self, pasajeros, n_individuos,n_generaciones,distancia_entre_asientos,aptitud_deseada,n_filas):
+    def __init__(self, pasajeros, n_individuos,n_generaciones,distancia_entre_asientos,n_filas,separacion_entre_asientos):
         # Variables que se pueden modificar
         self.pasajeros = pasajeros
         self.n_individuos = n_individuos
         self.n_generaciones = n_generaciones
-        self.diatancia_entre_asientos=distancia_entre_asientos
-        self.aptitud_deseada=aptitud_deseada
+        self.distancia_entre_asientos=distancia_entre_asientos
         self.n_filas=n_filas
+        self.separacion_asientos=separacion_entre_asientos
         self.n_mutaciones=2
         self.k = 3
         self.ancho_moto = 150
@@ -45,7 +46,7 @@ class AlgoritmoGenetico:
             #Se insertan los nuevos en la población general
             for indiv in poblacion_nueva:
                 self.poblacion.append(indiv)
-            
+            self.ordenar_poblacion_por_aptitud()
             print("Poblacion antes de la poda")
             for indiv in self.poblacion:
                 print(indiv)
@@ -69,20 +70,27 @@ class AlgoritmoGenetico:
             print(individuo)
     
     def crear_individuo_con_aptitud(self, individuo_data):
-        x=self.calcular_aptitud_x(individuo_data)
-        y=self.calcular_aptitud_y(individuo_data)
-        individuo={'data': individuo_data, 'aptitud_x': x, 'aptitud_y': y,'id': self.id_indiv}
+        x=self.calcular_x(individuo_data)
+        y=self.calcular_y(individuo_data)
+        aptitud=round(self.calcular_aptitud(x,y),2)
+        individuo={'data': individuo_data,'aptitud':aptitud,'id': self.id_indiv}
         self.id_indiv += 1
         return individuo
 
-    def crear_individuo_sin_aptitud(self, individuo_data):
+    def crear_individuo_sin_coordenadas(self, individuo_data):
         individuo={'data': individuo_data}
         return individuo
     def agregar_aptitud_a_individuo(self, individuo):
-        individuo['aptitud_x'] = self.calcular_aptitud_x(individuo['data'])
-        individuo['aptitud_y'] = self.calcular_aptitud_y(individuo['data'])
+        x = self.calcular_x(individuo['data'])
+        y = self.calcular_y(individuo['data'])
+        individuo['aptitud']=round(self.calcular_aptitud(x,y),2)
         individuo['id'] = self.id_indiv
         self.id_indiv += 1
+    def calcular_aptitud(self,x,y):
+        #(x1=160,y1=160)x2=x,y2=y
+        x_centro=((self.distancia_entre_asientos*4)+self.separacion_asientos)/2
+        y_centro=(80*self.n_filas)/2
+        return math.sqrt((x-x_centro)**2 + (y-y_centro)**2)
 
     def mutacion(self,nueva_poblacion):
         # print("Poblacion iniciales: ", self.poblacion)
@@ -134,8 +142,10 @@ class AlgoritmoGenetico:
                 else:
                     aux_indv2 += 1
         
-        individuo=self.crear_individuo_sin_aptitud(resultado)
+        individuo=self.crear_individuo_sin_coordenadas(resultado)
         return individuo
+    def ordenar_poblacion_por_aptitud(self):
+        self.poblacion.sort(key=lambda aptitud: aptitud['aptitud'])
 
     def poda(self):
         self.ordenar_poblacion()
@@ -157,7 +167,7 @@ class AlgoritmoGenetico:
     # 4 ,5 ,6 ,7 ,
     # 8 ,9 ,10,11,
     # 12,13,14,15]
-    def calcular_aptitud_y(self, individuo):
+    def calcular_y(self, individuo):
         suma_y = 0
         suma_masa = 0
         list_valores_en_y = []
@@ -193,11 +203,11 @@ class AlgoritmoGenetico:
         #         suma_masa += gen_masa
         return round(suma_y/suma_masa,1)
 
-    def calcular_aptitud_x(self,individuo):
+    def calcular_x(self,individuo):
         x40={'x':40,'valores':[0,4,8,12]}
         x120={'x':120,'valores':[1,5,9,13]}
-        x200={'x':200,'valores':[2,6,10,14]}
-        x280={'x':280,'valores':[3,7,11,15]}
+        x200={'x':200+self.separacion_asientos,'valores':[2,6,10,14]}
+        x280={'x':280+self.separacion_asientos,'valores':[3,7,11,15]}
         
         suma_x=0
         suma_masa=0
@@ -221,9 +231,9 @@ if __name__ == '__main__':
     n_filas=4 #Valor constante definido en la planeación de la resolución
     numero_pasajeros=4*n_filas
     numero_generaciones=1
+    separacion_asientos=50
     #Se calcula tomando en cuenta la distancia entre pajeros (asientos)
-    distancia_entre_asientos=80
-    aptitud_deseada=((distancia_entre_asientos*n_filas)/2)
+    tamaño_asiento=80
     pasajeros=crear_pasajeros(numero_pasajeros) 
-    AG=AlgoritmoGenetico(pasajeros, numero_pasajeros,numero_generaciones,distancia_entre_asientos,aptitud_deseada,n_filas)
+    AG=AlgoritmoGenetico(pasajeros, numero_pasajeros,numero_generaciones,tamaño_asiento,n_filas,separacion_asientos)
     
