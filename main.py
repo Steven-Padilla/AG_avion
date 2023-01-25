@@ -1,18 +1,18 @@
-from Helper import crear_pasajeros,generar_rango_cruza,arr_numeros,llenar_resultado
+from Helper import crear_pasajeros, generar_rango_cruza, arr_numeros, llenar_resultado
 import random
 import math
 
 
 class AlgoritmoGenetico:
-    def __init__(self, pasajeros, n_individuos,n_generaciones,distancia_entre_asientos,n_filas,separacion_entre_asientos):
+    def __init__(self, pasajeros, n_individuos, n_generaciones, distancia_entre_asientos, n_filas, separacion_entre_asientos):
         # Variables que se pueden modificar
         self.pasajeros = pasajeros
         self.n_individuos = n_individuos
         self.n_generaciones = n_generaciones
-        self.distancia_entre_asientos=distancia_entre_asientos
-        self.n_filas=n_filas
-        self.separacion_asientos=separacion_entre_asientos
-        self.n_mutaciones=2
+        self.distancia_entre_asientos = distancia_entre_asientos
+        self.n_filas = n_filas
+        self.separacion_asientos = separacion_entre_asientos
+        self.n_mutaciones = 2
         self.k = 3
         self.ancho_moto = 150
         self.id_indiv = 1
@@ -25,36 +25,38 @@ class AlgoritmoGenetico:
         self.bucle_algoritmo()
 
     def bucle_algoritmo(self):
-        aux=0
-        while(aux<self.n_generaciones):
-            poblacion_nueva=[]
-            #Hacer todo el bucle del algoritmo
-            for i in range(len(self.poblacion)):                
-                if i==(len(self.poblacion)-1):
-                    individuo=self.cruza(self.poblacion[i].get('data'), self.poblacion[0].get('data'))
+        aux = 0
+        while (aux < self.n_generaciones):
+            poblacion_nueva = []
+            # Hacer todo el bucle del algoritmo
+            for i in range(len(self.poblacion)):
+                if i == (len(self.poblacion)-1):
+                    individuo = self.cruza(self.poblacion[i].get(
+                        'data'), self.poblacion[0].get('data'))
                     poblacion_nueva.append(individuo)
-                else:    
-                    individuo=self.cruza(self.poblacion[i].get('data'), self.poblacion[i+1].get('data'))
+                else:
+                    individuo = self.cruza(self.poblacion[i].get(
+                        'data'), self.poblacion[i+1].get('data'))
                     poblacion_nueva.append(individuo)
-            #Se hace la mutación
+            # Se hace la mutación
             self.mutacion(poblacion_nueva)
-            
-            #Se calcula la aptitud para cada individuo y se agrega id
+
+            # Se calcula la aptitud para cada individuo y se agrega id
             for indiv in poblacion_nueva:
                 self.agregar_aptitud_a_individuo(indiv)
-            
-            #Se insertan los nuevos en la población general
+
+            # Se insertan los nuevos en la población general
             for indiv in poblacion_nueva:
                 self.poblacion.append(indiv)
             self.ordenar_poblacion_por_aptitud()
-            #Poda hasta tener el numero de individuos iniciales
+            # Poda hasta tener el numero de individuos iniciales
             self.poda()
             print(f'Mejor individuo: {self.poblacion[0]}')
             print(f'Peor individuo: {self.poblacion[self.n_individuos-1]}')
             print(f'Generación {aux+1}')
             for indiv in self.poblacion:
                 print(indiv)
-            aux+=1
+            aux += 1
 
     def primera_gen(self):
         individuo_aux = []
@@ -65,43 +67,45 @@ class AlgoritmoGenetico:
             random.shuffle(individuo_aux)
             individuo = individuo_aux.copy()
             self.poblacion.append(self.crear_individuo_con_aptitud(individuo))
-        print ('Población inicial')
+        print('Población inicial')
         for individuo in self.poblacion:
             print(individuo)
-    
+
     def crear_individuo_con_aptitud(self, individuo_data):
-        x=self.calcular_x(individuo_data)
-        y=self.calcular_y(individuo_data)
-        aptitud=round(self.calcular_aptitud(x,y),2)
-        individuo={'data': individuo_data,'aptitud':aptitud,'id': self.id_indiv}
+        x = self.calcular_x(individuo_data)
+        y = self.calcular_y(individuo_data)
+        aptitud = round(self.calcular_aptitud(x, y), 2)
+        individuo = {'data': individuo_data,
+                     'aptitud': aptitud, 'id': self.id_indiv}
         self.id_indiv += 1
         return individuo
 
     def crear_individuo_sin_coordenadas(self, individuo_data):
-        individuo={'data': individuo_data}
+        individuo = {'data': individuo_data}
         return individuo
+
     def agregar_aptitud_a_individuo(self, individuo):
         x = self.calcular_x(individuo['data'])
         y = self.calcular_y(individuo['data'])
-        individuo['aptitud']=round(self.calcular_aptitud(x,y),2)
+        individuo['aptitud'] = round(self.calcular_aptitud(x, y), 2)
         individuo['id'] = self.id_indiv
         self.id_indiv += 1
-    def calcular_aptitud(self,x,y):
-        #(x1=160,y1=160)x2=x,y2=y
-        x_centro=((self.distancia_entre_asientos*4)+self.separacion_asientos)/2
-        y_centro=(80*self.n_filas)/2
+
+    def calcular_aptitud(self, x, y):
+        # (x1=160,y1=160)x2=x,y2=y
+        x_centro = ((self.distancia_entre_asientos*4) +
+                    self.separacion_asientos)/2
+        y_centro = (80*self.n_filas)/2
         return math.sqrt((x-x_centro)**2 + (y-y_centro)**2)
 
-    def mutacion(self,nueva_poblacion):
+    def mutacion(self, nueva_poblacion):
         # print("Poblacion iniciales: ", self.poblacion)
         for index, individuo in enumerate(nueva_poblacion):
             for _ in range(self.n_mutaciones):
                 a, b = random.choices(self.cant_genes, k=2)
-                individuo.get('data')[a], individuo.get('data')[b] = individuo.get('data')[b], individuo.get('data')[a]
+                individuo.get('data')[a], individuo.get('data')[
+                    b] = individuo.get('data')[b], individuo.get('data')[a]
         # print("Poblacion Mutada: ", self.poblacion)
-
-
-
 
     def cruza(self, indiv1, indiv2):
         # llenado parametros iniciales
@@ -141,9 +145,10 @@ class AlgoritmoGenetico:
                     band = True
                 else:
                     aux_indv2 += 1
-        
-        individuo=self.crear_individuo_sin_coordenadas(resultado)
+
+        individuo = self.crear_individuo_sin_coordenadas(resultado)
         return individuo
+
     def ordenar_poblacion_por_aptitud(self):
         self.poblacion.sort(key=lambda aptitud: aptitud['aptitud'])
 
@@ -156,55 +161,54 @@ class AlgoritmoGenetico:
             if pasajero.id == target_id:
                 return pasajero
 
-    
     def calcular_y(self, individuo):
         suma_y = 0
         suma_masa = 0
         list_valores_en_y = []
-        aux_fila=0
-        valor_en_y=40
+        aux_fila = 0
+        valor_en_y = 40
         for _ in range(self.n_filas):
-            list_valores_en_y.append({'y':valor_en_y,'valores':[aux_fila,aux_fila+1,aux_fila+2,aux_fila+3]})
-            aux_fila+=4
-            valor_en_y+=80
+            list_valores_en_y.append(
+                {'y': valor_en_y, 'valores': [aux_fila, aux_fila+1, aux_fila+2, aux_fila+3]})
+            aux_fila += 4
+            valor_en_y += 80
         for index, id_pasaj in enumerate(individuo):
-            gen_masa=self.encontrar_pasajero(id_pasaj).masa
+            gen_masa = self.encontrar_pasajero(id_pasaj).masa
             for valores in list_valores_en_y:
                 if index in valores['valores']:
                     suma_y += (valores['y']*gen_masa)
                     suma_masa += gen_masa
-        
-        return round(suma_y/suma_masa,1)
-    #[0,4,8,12]
-    #[1,5,9,13]
-    #[2,6,10,14]
-    #[3,7,11,15]
-    def calcular_x(self,individuo):
+
+        return round(suma_y/suma_masa, 1)
+
+    def calcular_x(self, individuo):
         suma_x = 0
         suma_masa = 0
-        list_valores_en_x = [{'x':40,'valores':[]},{'x':120,'valores':[]},{'x':250,'valores':[]},{'x':330,'valores':[]}]
-        aux_fila=0
+        list_valores_en_x = [{'x': 40, 'valores': []}, {'x': 120, 'valores': []}, {
+            'x': 250, 'valores': []}, {'x': 330, 'valores': []}]
+        aux_fila = 0
         for _ in range(self.n_filas):
             for i in range(4):
                 list_valores_en_x[i]['valores'].append(aux_fila)
-                aux_fila+=1
+                aux_fila += 1
         for data in list_valores_en_x:
             print(data)
         for index, id_pasaj in enumerate(individuo):
-            gen_masa=self.encontrar_pasajero(id_pasaj).masa
+            gen_masa = self.encontrar_pasajero(id_pasaj).masa
             for valores in list_valores_en_x:
                 if index in valores['valores']:
                     suma_x += (valores['x']*gen_masa)
                     suma_masa += gen_masa
-        return round(suma_x/suma_masa,1)
-            
+        return round(suma_x/suma_masa, 1)
+
+
 if __name__ == '__main__':
-    n_filas=4 #Valor cambiable
-    numero_pasajeros=4*n_filas
-    numero_generaciones=1
-    separacion_asientos=50
-    #Se calcula tomando en cuenta la distancia entre pajeros (asientos)
-    tamaño_asiento=80
-    pasajeros=crear_pasajeros(numero_pasajeros) 
-    AG=AlgoritmoGenetico(pasajeros, numero_pasajeros,numero_generaciones,tamaño_asiento,n_filas,separacion_asientos)
-    
+    n_filas = 4  # Valor cambiable
+    numero_pasajeros = 4*n_filas
+    numero_generaciones = 1
+    separacion_asientos = 50
+    # Se calcula tomando en cuenta la distancia entre pajeros (asientos)
+    tamaño_asiento = 80
+    pasajeros = crear_pasajeros(numero_pasajeros)
+    AG = AlgoritmoGenetico(pasajeros, numero_pasajeros, numero_generaciones,
+                           tamaño_asiento, n_filas, separacion_asientos)
