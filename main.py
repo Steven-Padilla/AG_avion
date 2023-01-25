@@ -1,23 +1,56 @@
-from Helper import crear_pasajeros
+from Helper import crear_pasajeros,generar_rango_cruza,arr_numeros,llenar_resultado
 import random
 
 
 class AlgoritmoGenetico:
-    def __init__(self, pasajeros, n_individuos):
+    def __init__(self, pasajeros, n_individuos,n_generaciones):
         # Variables que se pueden modificar
         self.pasajeros = pasajeros
         self.n_individuos = n_individuos
-        self.n_generaciones = 10
+        self.n_generaciones = n_generaciones
+        self.n_mutaciones=2
         self.k = 3
         self.ancho_moto = 150
         self.id_indiv = 1
-        # self.cant_genes = arr_numeros(self.n_individuos)
-        # self.pasajeros = crear_pasajeros(n_pasajeros)
+        self.cant_genes = arr_numeros(self.n_individuos)
         self.poblacion = []
         self.nueva_poblacion = []
         self.mejor_individuo = []
         self.peor_individuo = []
         self.primera_gen()
+        self.bucle_algoritmo()
+
+    def bucle_algoritmo(self):
+        aux=0
+        while(aux<self.n_generaciones):
+            poblacion_nueva=[]
+            #Hacer todo el bucle del algoritmo
+            for i in range(len(self.poblacion)):                
+                if i==(len(self.poblacion)-1):
+                    individuo=self.cruza(self.poblacion[i].get('data'), self.poblacion[0].get('data'))
+                    poblacion_nueva.append(individuo)
+                else:    
+                    individuo=self.cruza(self.poblacion[i].get('data'), self.poblacion[i+1].get('data'))
+                    poblacion_nueva.append(individuo)
+            #Se hace la mutación
+            self.mutacion(poblacion_nueva)
+            
+            #Se calcula la aptitud para cada individuo y se agrega id
+            for indiv in poblacion_nueva:
+                self.agregar_aptitud_a_individuo(indiv)
+            
+            #Se insertan los nuevos en la población general
+            for indiv in poblacion_nueva:
+                self.poblacion.append(indiv)
+            
+            print("Poblacion antes de la poda")
+            for indiv in self.poblacion:
+                print(indiv)
+
+
+            #Acá va la poda
+            
+            aux+=1
 
     def primera_gen(self):
         individuo_aux = []
@@ -27,44 +60,46 @@ class AlgoritmoGenetico:
         for _ in range(self.n_individuos):
             random.shuffle(individuo_aux)
             individuo = individuo_aux.copy()
-            aptitud_x = self.calcular_aptitud_x(individuo)
-            aptitud_y = self.calcular_aptitud_y(individuo)
-            self.poblacion.append(
-                {'id': self.id_indiv, 'data': individuo, 'aptitud_x': aptitud_x, 'aptitud_y': aptitud_y})
-            self.id_indiv += 1
-        print(self.poblacion[0])
-        for gen in self.poblacion[0].get('data'):
-            print(self.encontrar_pasajero(gen))
-        # print(self.poblacion)
-        # for individuo in poblacion:
-            # print(individuo)
-        # for _ in range(self.n_individuos):
-        #     random.shuffle(poblacion)
-        #     self.crear_individuo(poblacion[:],False)
+            self.poblacion.append(self.crear_individuo_con_aptitud(individuo))
+        print ('Población inicial')
+        for individuo in self.poblacion:
+            print(individuo)
+    
+    def crear_individuo_con_aptitud(self, individuo_data):
+        x=self.calcular_aptitud_x(individuo_data)
+        y=self.calcular_aptitud_y(individuo_data)
+        individuo={'data': individuo_data, 'aptitud_x': x, 'aptitud_y': y,'id': self.id_indiv}
+        self.id_indiv += 1
+        return individuo
 
-    def mutacion(self):
+    def crear_individuo_sin_aptitud(self, individuo_data):
+        individuo={'data': individuo_data}
+        return individuo
+    def agregar_aptitud_a_individuo(self, individuo):
+        individuo['aptitud_x'] = self.calcular_aptitud_x(individuo['data'])
+        individuo['aptitud_y'] = self.calcular_aptitud_y(individuo['data'])
+        individuo['id'] = self.id_indiv
+        self.id_indiv += 1
+
+    def mutacion(self,nueva_poblacion):
         # print("Poblacion iniciales: ", self.poblacion)
-        for index, individuo in enumerate(self.nueva_poblacion):
+        for index, individuo in enumerate(nueva_poblacion):
             for _ in range(self.n_mutaciones):
                 a, b = random.choices(self.cant_genes, k=2)
-                individuo.data[a], individuo.data[b] = individuo.data[b], individuo.data[a]
+                individuo.get('data')[a], individuo.get('data')[b] = individuo.get('data')[b], individuo.get('data')[a]
         # print("Poblacion Mutada: ", self.poblacion)
 
-    def llenar_resultado(self, x):
-        # k
-        pass
 
-    def generar_rango_cruza(self, x):
-        # k
-        pass
+
 
     def cruza(self, indiv1, indiv2):
         # llenado parametros iniciales
         resultado = []
         indiv1_copy = indiv1.copy()
         index_aux = 0
-        resultado = self.llenar_resultado(self.n_individuos)
-        a, b = self.generar_rango_cruza(self.cant_genes)
+        # Se crea un arreglo temporal con -1 el cual será el arreglo que se retorna como resultado de la cruza
+        resultado = llenar_resultado(self.n_individuos)
+        a, b = generar_rango_cruza(self.cant_genes)
 
         # se introduce a resultado los valores seleccionados del primer individuo
         for i in range(a, b+1):
@@ -95,8 +130,9 @@ class AlgoritmoGenetico:
                     band = True
                 else:
                     aux_indv2 += 1
-        self.crear_individuo(resultado, True)
-        print(len(self.poblacion))
+        
+        individuo=self.crear_individuo_sin_aptitud(resultado)
+        return individuo
 
     def poda(self):
         self.ordenar_poblacion()
@@ -168,8 +204,7 @@ class AlgoritmoGenetico:
 if __name__ == '__main__':
     n_filas=4 #Valor constante definido en la planeación de la resolución
     numero_pasajeros=4*n_filas
+    numero_generaciones=1
     pasajeros=crear_pasajeros(numero_pasajeros) 
-    for pasajero in pasajeros:
-        print(pasajero)
-    AG=AlgoritmoGenetico(pasajeros, numero_pasajeros)
+    AG=AlgoritmoGenetico(pasajeros, numero_pasajeros,numero_generaciones)
     
