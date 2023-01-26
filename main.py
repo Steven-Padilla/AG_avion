@@ -251,7 +251,7 @@ class Interfaz:
         fila = int(self.filas.get())
         return fila
     def aplicar_datos(self):
-        self.wind.quit()
+        self.wind.destroy()
 def generar_grafica(algoritmo):
     list_epocas = []
     list_mejores_aptitud = []
@@ -273,14 +273,17 @@ if __name__ == '__main__':
     window = tk.Tk()
     entrada= Interfaz(window)
     n_filas = entrada.ingresar_fila()
-    numero_pasajeros = 4*n_filas
+    numero_pasajeros_max = 4*n_filas
+    numero_pasajeros= round(random.uniform(0,4*n_filas))
     numero_generaciones=5
     numero_generaciones = entrada.ingresar_generaciones()
     separacion_asientos = 50
     # Se calcula tomando en cuenta la distancia entre pajeros (asientos)
     tamaño_asiento = 80
-    pasajeros = crear_pasajeros(numero_pasajeros)
+    pasajeros = crear_pasajeros(numero_pasajeros,numero_pasajeros_max)
+    for pasajero in pasajeros:
+        print(pasajero)
     print(f'Filas: {n_filas}\nGeneraciones: {numero_generaciones}')
-    AG = AlgoritmoGenetico(pasajeros, numero_pasajeros, numero_generaciones,
+    AG = AlgoritmoGenetico(pasajeros, numero_pasajeros_max, numero_generaciones,
                            tamaño_asiento, n_filas, separacion_asientos)
     generar_grafica(AG)
