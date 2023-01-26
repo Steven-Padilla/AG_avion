@@ -3,6 +3,7 @@ import random
 import tkinter as tk
 import math
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 class AlgoritmoGenetico:
@@ -15,6 +16,7 @@ class AlgoritmoGenetico:
         self.n_filas = n_filas
         self.separacion_asientos = separacion_entre_asientos
         self.n_mutaciones = 2
+        self.prob_mutacion=1
         self.k = 3
         self.lista_data_x=calcular_data_lista_x(self.n_filas)
         self.lista_data_y=calcular_data_lista_y(self.n_filas)
@@ -30,6 +32,7 @@ class AlgoritmoGenetico:
     def bucle_algoritmo(self):
         aux = 0
         while (aux < self.n_generaciones):
+            self.generacion=aux+1
             poblacion_nueva = []
             # Hacer todo el bucle del algoritmo
             for i in range(len(self.poblacion)):
@@ -53,9 +56,10 @@ class AlgoritmoGenetico:
                 self.poblacion.append(indiv)
             self.ordenar_poblacion_por_aptitud()
             # Poda hasta tener el numero de individuos iniciales
+            self.graficar_individuos()
             self.poda()
             self.mejor_individuo.append(self.poblacion[0])
-            self.peor_individuo.append(self.poblacion[self.n_filas-1])
+            self.peor_individuo.append(self.poblacion[self.n_individuos-1])
             print(f'Mejor individuo: {self.poblacion[0]}')
             print(f'Peor individuo: {self.poblacion[self.n_individuos-1]}')
             print(f'Generación {aux+1}')
@@ -75,12 +79,26 @@ class AlgoritmoGenetico:
         print('Población inicial')
         for individuo in self.poblacion:
             print(individuo)
-
+    def graficar_individuos(self):
+        plt.subplots()
+        arr_x=[]
+        arr_y=[]
+        for individuo in self.poblacion:
+            arr_x.append(individuo['x'])
+            arr_y.append(individuo['y'])
+        x=np.array(arr_x)
+        y=np.array(arr_y)
+        plt.scatter(x,y)
+        x=np.array([self.x_centro])
+        y=np.array([self.y_centro])
+        plt.scatter(x,y)
+        plt.savefig(f'./images/generacion_{self.generacion}')
+        plt.close()
     def crear_individuo_con_aptitud(self, individuo_data):
         x = self.calcular_x(individuo_data)
         y = self.calcular_y(individuo_data)
         aptitud = round(self.calcular_aptitud(x, y), 2)
-        individuo = {'data': individuo_data,
+        individuo = {'data': individuo_data, 'x':x, 'y':y,
                      'aptitud': aptitud, 'id': self.id_indiv}
         self.id_indiv += 1
         return individuo
@@ -92,6 +110,8 @@ class AlgoritmoGenetico:
     def agregar_aptitud_a_individuo(self, individuo):
         x = self.calcular_x(individuo['data'])
         y = self.calcular_y(individuo['data'])
+        individuo['x']=x
+        individuo['y']=y
         individuo['aptitud'] = round(self.calcular_aptitud(x, y), 2)
         individuo['id'] = self.id_indiv
         self.id_indiv += 1
@@ -101,15 +121,18 @@ class AlgoritmoGenetico:
         x_centro = ((self.distancia_entre_asientos*4) +
                     self.separacion_asientos)/2
         y_centro = (80*self.n_filas)/2
+        self.x_centro=x_centro
+        self.y_centro=y_centro
         return math.sqrt((x-x_centro)**2 + (y-y_centro)**2)
 
     def mutacion(self, nueva_poblacion):
         # print("Poblacion iniciales: ", self.poblacion)
         for index, individuo in enumerate(nueva_poblacion):
-            for _ in range(self.n_mutaciones):
-                a, b = random.choices(self.cant_genes, k=2)
-                individuo.get('data')[a], individuo.get('data')[
-                    b] = individuo.get('data')[b], individuo.get('data')[a]
+            if random.uniform(0,1) < self.prob_mutacion:
+                for _ in range(self.n_mutaciones):
+                    a, b = random.choices(self.cant_genes, k=2)
+                    individuo.get('data')[a], individuo.get('data')[
+                        b] = individuo.get('data')[b], individuo.get('data')[a]
         # print("Poblacion Mutada: ", self.poblacion)
 
     def cruza(self, indiv1, indiv2):
