@@ -1,5 +1,6 @@
-from Helper import crear_pasajeros, generar_rango_cruza, arr_numeros, llenar_resultado
+from Helper import crear_pasajeros, generar_rango_cruza, arr_numeros, llenar_resultado,calcular_data_lista_y,calcular_data_lista_x
 import random
+import tkinter as tk
 import math
 
 
@@ -14,7 +15,8 @@ class AlgoritmoGenetico:
         self.separacion_asientos = separacion_entre_asientos
         self.n_mutaciones = 2
         self.k = 3
-        self.ancho_moto = 150
+        self.lista_data_x=calcular_data_lista_x(self.n_filas)
+        self.lista_data_y=calcular_data_lista_y(self.n_filas)
         self.id_indiv = 1
         self.cant_genes = arr_numeros(self.n_individuos)
         self.poblacion = []
@@ -164,14 +166,7 @@ class AlgoritmoGenetico:
     def calcular_y(self, individuo):
         suma_y = 0
         suma_masa = 0
-        list_valores_en_y = []
-        aux_fila = 0
-        valor_en_y = 40
-        for _ in range(self.n_filas):
-            list_valores_en_y.append(
-                {'y': valor_en_y, 'valores': [aux_fila, aux_fila+1, aux_fila+2, aux_fila+3]})
-            aux_fila += 4
-            valor_en_y += 80
+        list_valores_en_y = self.lista_data_y.copy()
         for index, id_pasaj in enumerate(individuo):
             gen_masa = self.encontrar_pasajero(id_pasaj).masa
             for valores in list_valores_en_y:
@@ -184,15 +179,7 @@ class AlgoritmoGenetico:
     def calcular_x(self, individuo):
         suma_x = 0
         suma_masa = 0
-        list_valores_en_x = [{'x': 40, 'valores': []}, {'x': 120, 'valores': []}, {
-            'x': 250, 'valores': []}, {'x': 330, 'valores': []}]
-        aux_fila = 0
-        for _ in range(self.n_filas):
-            for i in range(4):
-                list_valores_en_x[i]['valores'].append(aux_fila)
-                aux_fila += 1
-        for data in list_valores_en_x:
-            print(data)
+        list_valores_en_x = self.lista_data_x.copy()
         for index, id_pasaj in enumerate(individuo):
             gen_masa = self.encontrar_pasajero(id_pasaj).masa
             for valores in list_valores_en_x:
@@ -201,14 +188,56 @@ class AlgoritmoGenetico:
                     suma_masa += gen_masa
         return round(suma_x/suma_masa, 1)
 
+class Interfaz:
+    def __init__(self, window):
+        #TKinter
+        self.wind = window
+        self.wind.geometry("600x250")
+        self.wind.eval("tk::PlaceWindow . center")
+        self.wind.title('Algoritmo genetico')
+        self.wind.columnconfigure(0, weight=1)
+        #////
+        self.label1=tk.Label(self.wind,text="Ingrese la cantidad de filas del avion:")
+        self.label1.grid(column=0, row=0)
+        self.filas=tk.IntVar()
 
+        self.entry1=tk.Entry(self.wind, width=10, textvariable=self.filas)
+        self.entry1.grid(column=0, row=1)
+
+        self.label2=tk.Label(self.wind,text="Ingrese la cantidad de generaciones a crear:")
+        self.label2.grid(column=0, row=2)
+        self.generaciones=tk.IntVar()
+
+        self.entry2=tk.Entry(self.wind, width=10, textvariable=self.generaciones)
+        self.entry2.grid(column=0, row=3)
+
+        self.boton=tk.Button(self.wind, text="Aplicar", command=self.ingresar_generaciones)
+        self.boton.grid(column=0, row=4)
+        self.boton.config(command=self.ingresar_fila)
+        self.boton.config(command=self.aplicar_datos)
+
+        self.wind.mainloop()
+    
+    def ingresar_generaciones(self):
+        generaciones = int(self.generaciones.get())
+        return generaciones
+    def ingresar_fila(self):
+        fila = int(self.filas.get())
+        return fila
+    def aplicar_datos(self):
+        self.wind.quit()
 if __name__ == '__main__':
-    n_filas = 4  # Valor cambiable
+    #Tkinter
+    window = tk.Tk()
+    entrada= Interfaz(window)
+    n_filas = entrada.ingresar_fila()
     numero_pasajeros = 4*n_filas
-    numero_generaciones = 1
+    numero_generaciones=5
+    numero_generaciones = entrada.ingresar_generaciones()
     separacion_asientos = 50
     # Se calcula tomando en cuenta la distancia entre pajeros (asientos)
     tamaño_asiento = 80
     pasajeros = crear_pasajeros(numero_pasajeros)
+    print(f'Filas: {n_filas}\nGeneraciones: {numero_generaciones}')
     AG = AlgoritmoGenetico(pasajeros, numero_pasajeros, numero_generaciones,
                            tamaño_asiento, n_filas, separacion_asientos)
