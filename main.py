@@ -2,6 +2,7 @@ from Helper import crear_pasajeros, generar_rango_cruza, arr_numeros, llenar_res
 import random
 import tkinter as tk
 import math
+import matplotlib.pyplot as plt
 
 
 class AlgoritmoGenetico:
@@ -53,6 +54,8 @@ class AlgoritmoGenetico:
             self.ordenar_poblacion_por_aptitud()
             # Poda hasta tener el numero de individuos iniciales
             self.poda()
+            self.mejor_individuo.append(self.poblacion[0])
+            self.peor_individuo.append(self.poblacion[self.n_filas-1])
             print(f'Mejor individuo: {self.poblacion[0]}')
             print(f'Peor individuo: {self.poblacion[self.n_individuos-1]}')
             print(f'Generación {aux+1}')
@@ -226,6 +229,22 @@ class Interfaz:
         return fila
     def aplicar_datos(self):
         self.wind.quit()
+def generar_grafica(algoritmo):
+    list_epocas = []
+    list_mejores_aptitud = []
+    list_peores_aptitud = []
+    for k in algoritmo.mejor_individuo:
+        list_mejores_aptitud.append(k.get('aptitud'))
+    for j in algoritmo.peor_individuo:
+        list_peores_aptitud.append(j.get('aptitud'))
+    for i in range(algoritmo.n_generaciones):
+        list_epocas.append(i+1)  
+    fig, ax = plt.subplots()
+    ax.plot(list_epocas, list_mejores_aptitud,label='Mejores Aptitud')
+    ax.plot(list_epocas, list_peores_aptitud, color='red',label='Peores Aptitud')
+    ax.legend(loc='upper right')
+    plt.show()  
+
 if __name__ == '__main__':
     #Tkinter
     window = tk.Tk()
@@ -241,3 +260,4 @@ if __name__ == '__main__':
     print(f'Filas: {n_filas}\nGeneraciones: {numero_generaciones}')
     AG = AlgoritmoGenetico(pasajeros, numero_pasajeros, numero_generaciones,
                            tamaño_asiento, n_filas, separacion_asientos)
+    generar_grafica(AG)
