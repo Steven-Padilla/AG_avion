@@ -15,6 +15,7 @@ class AlgoritmoGenetico:
         self.distancia_entre_asientos = distancia_entre_asientos
         self.n_filas = n_filas
         self.separacion_asientos = separacion_entre_asientos
+        self.len_poblacion=16
         self.n_mutaciones = 2
         self.prob_mutacion=1
         self.k = 3
@@ -59,9 +60,9 @@ class AlgoritmoGenetico:
             self.poda()
             self.graficar_individuos(aux+1)
             self.mejor_individuo.append(self.poblacion[0])
-            self.peor_individuo.append(self.poblacion[self.n_individuos-1])
+            self.peor_individuo.append(self.poblacion[self.len_poblacion-1])
             print(f'Mejor individuo: {self.poblacion[0]}')
-            print(f'Peor individuo: {self.poblacion[self.n_individuos-1]}')
+            print(f'Peor individuo: {self.poblacion[self.len_poblacion-1]}')
             print(f'Generación {aux+1}')
             for indiv in self.poblacion:
                 print(indiv)
@@ -72,7 +73,7 @@ class AlgoritmoGenetico:
         for pasajero in self.pasajeros:
             individuo_aux.append(pasajero.id)
 
-        for _ in range(self.n_individuos):
+        for _ in range(self.len_poblacion):
             random.shuffle(individuo_aux)
             individuo = individuo_aux.copy()
             self.poblacion.append(self.crear_individuo_con_aptitud(individuo))
@@ -86,12 +87,12 @@ class AlgoritmoGenetico:
         for individuo in self.poblacion:
             arr_x.append(individuo['x'])
             arr_y.append(individuo['y'])
-        x=np.array(arr_x)
-        y=np.array(arr_y)
-        plt.scatter(x,y,label='Individuos')
         x=np.array([self.x_centro])
         y=np.array([self.y_centro])
-        plt.scatter(x,y,label='Centro de masa')
+        plt.scatter(x,y,label='Individuos',marker='x')
+        x=np.array(arr_x)
+        y=np.array(arr_y)
+        plt.scatter(x,y,label=f'Centro de masa({self.x_centro},{self.y_centro})',marker='o')
         aux.set_title(f'Individuos en generacion: {n_generacion}',fontdict={'fontsize':20,'fontweight':'bold'})
         aux.set_xlabel('X',fontdict={'fontsize':15,'fontweight':'bold', 'color':'tab:red'})
         aux.set_ylabel('Y',fontdict={'fontsize':15,'fontweight':'bold', 'color':'tab:blue'})
@@ -185,7 +186,7 @@ class AlgoritmoGenetico:
         self.poblacion.sort(key=lambda aptitud: aptitud['aptitud'])
 
     def poda(self):
-        while len(self.poblacion) != self.n_individuos:
+        while len(self.poblacion) != self.len_poblacion:
             self.poblacion.pop()
 
     def encontrar_pasajero(self, target_id):
@@ -279,6 +280,7 @@ if __name__ == '__main__':
     n_filas = entrada.ingresar_fila()
     numero_pasajeros_max = 4*n_filas
     numero_pasajeros= round(random.uniform(1,4*n_filas))
+    print(numero_pasajeros)
     numero_generaciones=5
     numero_generaciones = entrada.ingresar_generaciones()
     separacion_asientos = 50

@@ -5,7 +5,7 @@ def crear_pasajeros(n_pasajeros,n_pasajeros_max):
     pasajeros=[]
     i=0
     for _ in range(n_pasajeros):
-        pasajeros.append(Pasajero(i+1,round(random.normalvariate(65,5),1)))
+        pasajeros.append(Pasajero(i+1,round(random.normalvariate(65,10),1)))
         i+=1
     for _ in range(n_pasajeros_max-n_pasajeros):
         pasajeros.append(Pasajero(i+1,0))
