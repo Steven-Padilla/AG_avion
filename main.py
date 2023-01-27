@@ -56,8 +56,8 @@ class AlgoritmoGenetico:
                 self.poblacion.append(indiv)
             self.ordenar_poblacion_por_aptitud()
             # Poda hasta tener el numero de individuos iniciales
-            self.graficar_individuos()
             self.poda()
+            self.graficar_individuos(aux+1)
             self.mejor_individuo.append(self.poblacion[0])
             self.peor_individuo.append(self.poblacion[self.n_individuos-1])
             print(f'Mejor individuo: {self.poblacion[0]}')
@@ -79,8 +79,8 @@ class AlgoritmoGenetico:
         print('Población inicial')
         for individuo in self.poblacion:
             print(individuo)
-    def graficar_individuos(self):
-        plt.subplots()
+    def graficar_individuos(self,n_generacion):
+        fig,aux=plt.subplots()
         arr_x=[]
         arr_y=[]
         for individuo in self.poblacion:
@@ -88,10 +88,14 @@ class AlgoritmoGenetico:
             arr_y.append(individuo['y'])
         x=np.array(arr_x)
         y=np.array(arr_y)
-        plt.scatter(x,y)
+        plt.scatter(x,y,label='Individuos')
         x=np.array([self.x_centro])
         y=np.array([self.y_centro])
-        plt.scatter(x,y)
+        plt.scatter(x,y,label='Centro de masa')
+        aux.set_title(f'Individuos en generacion: {n_generacion}',fontdict={'fontsize':20,'fontweight':'bold'})
+        aux.set_xlabel('X',fontdict={'fontsize':15,'fontweight':'bold', 'color':'tab:red'})
+        aux.set_ylabel('Y',fontdict={'fontsize':15,'fontweight':'bold', 'color':'tab:blue'})
+        aux.legend(loc='upper right',prop={'size':10})
         plt.savefig(f'./images/generacion_{self.generacion}')
         plt.close()
     def crear_individuo_con_aptitud(self, individuo_data):
@@ -274,7 +278,7 @@ if __name__ == '__main__':
     entrada= Interfaz(window)
     n_filas = entrada.ingresar_fila()
     numero_pasajeros_max = 4*n_filas
-    numero_pasajeros= round(random.uniform(0,4*n_filas))
+    numero_pasajeros= round(random.uniform(1,4*n_filas))
     numero_generaciones=5
     numero_generaciones = entrada.ingresar_generaciones()
     separacion_asientos = 50
