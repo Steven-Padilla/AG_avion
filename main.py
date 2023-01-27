@@ -30,6 +30,7 @@ class AlgoritmoGenetico:
         self.primera_gen()
         self.bucle_algoritmo()
 
+
     def bucle_algoritmo(self):
         aux = 0
         while (aux < self.n_generaciones):
@@ -280,7 +281,6 @@ if __name__ == '__main__':
     n_filas = entrada.ingresar_fila()
     numero_pasajeros_max = 4*n_filas
     numero_pasajeros= round(random.uniform(1,4*n_filas))
-    print(numero_pasajeros)
     numero_generaciones=5
     numero_generaciones = entrada.ingresar_generaciones()
     separacion_asientos = 50
