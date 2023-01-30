@@ -7,17 +7,17 @@ import numpy as np
 
 
 class AlgoritmoGenetico:
-    def __init__(self, pasajeros, n_individuos, n_generaciones, distancia_entre_asientos, n_filas, separacion_entre_asientos):
+    def __init__(self, pasajeros, n_individuos, n_generaciones, tamanio_asiento, n_filas, separacion_entre_asientos,tamanio_poblacion,n_mutaciones,prob_muta):
         # Variables que se pueden modificar
         self.pasajeros = pasajeros
         self.n_individuos = n_individuos
         self.n_generaciones = n_generaciones
-        self.distancia_entre_asientos = distancia_entre_asientos
+        self.tamanio_asiento = tamanio_asiento
         self.n_filas = n_filas
         self.separacion_asientos = separacion_entre_asientos
-        self.len_poblacion=16
-        self.n_mutaciones = 2
-        self.prob_mutacion=1
+        self.tamanio_poblacion=tamanio_poblacion
+        self.n_mutaciones = n_mutaciones
+        self.prob_mutacion=prob_muta
         self.k = 3
         self.lista_data_x=calcular_data_lista_x(self.n_filas)
         self.lista_data_y=calcular_data_lista_y(self.n_filas)
@@ -57,12 +57,12 @@ class AlgoritmoGenetico:
                 self.poblacion.append(indiv)
             self.ordenar_poblacion_por_aptitud()
             # Poda hasta tener el numero de individuos iniciales
-            self.poda()
             self.graficar_individuos(aux+1)
+            self.poda()
             self.mejor_individuo.append(self.poblacion[0])
-            self.peor_individuo.append(self.poblacion[self.len_poblacion-1])
+            self.peor_individuo.append(self.poblacion[self.tamanio_poblacion-1])
             print(f'Mejor individuo: {self.poblacion[0]}')
-            print(f'Peor individuo: {self.poblacion[self.len_poblacion-1]}')
+            print(f'Peor individuo: {self.poblacion[self.tamanio_poblacion-1]}')
             print(f'Generación {aux+1}')
             for indiv in self.poblacion:
                 print(indiv)
@@ -73,7 +73,7 @@ class AlgoritmoGenetico:
         for pasajero in self.pasajeros:
             individuo_aux.append(pasajero.id)
 
-        for _ in range(self.len_poblacion):
+        for _ in range(self.tamanio_poblacion):
             random.shuffle(individuo_aux)
             individuo = individuo_aux.copy()
             self.poblacion.append(self.crear_individuo_con_aptitud(individuo))
@@ -123,7 +123,7 @@ class AlgoritmoGenetico:
 
     def calcular_aptitud(self, x, y):
         # (x1=160,y1=160)x2=x,y2=y
-        x_centro = ((self.distancia_entre_asientos*4) +
+        x_centro = ((self.tamanio_asiento*4) +
                     self.separacion_asientos)/2
         y_centro = (80*self.n_filas)/2
         self.x_centro=x_centro
@@ -186,7 +186,7 @@ class AlgoritmoGenetico:
         self.poblacion.sort(key=lambda aptitud: aptitud['aptitud'])
 
     def poda(self):
-        while len(self.poblacion) != self.len_poblacion:
+        while len(self.poblacion) != self.tamanio_poblacion:
             self.poblacion.pop()
 
     def encontrar_pasajero(self, target_id):
@@ -223,32 +223,75 @@ class Interfaz:
     def __init__(self, window):
         #TKinter
         self.wind = window
-        self.wind.geometry("600x250")
-        self.wind.eval("tk::PlaceWindow . center")
+        self.wind.geometry("900x400")
+        # self.wind.eval("tk::PlaceWindow .")
         self.wind.title('Algoritmo genetico')
-        self.wind.columnconfigure(0, weight=1)
+        self.wind.columnconfigure(0, weight=0)
         #////
         self.label1=tk.Label(self.wind,text="Ingrese la cantidad de filas del avion:")
         self.label1.grid(column=0, row=0)
         self.filas=tk.IntVar()
 
-        self.entry1=tk.Entry(self.wind, width=10, textvariable=self.filas)
+        self.entry1=tk.Entry(self.wind, width=20, textvariable=self.filas)
         self.entry1.grid(column=0, row=1)
 
         self.label2=tk.Label(self.wind,text="Ingrese la cantidad de generaciones a crear:")
         self.label2.grid(column=0, row=2)
         self.generaciones=tk.IntVar()
 
-        self.entry2=tk.Entry(self.wind, width=10, textvariable=self.generaciones)
+        self.entry2=tk.Entry(self.wind, width=20, textvariable=self.generaciones)
         self.entry2.grid(column=0, row=3)
 
+        self.label3=tk.Label(self.wind,text="Ingrese la cantidad de pasajeros a abordar :")
+        self.label3.grid(column=0, row=4)
+        self.pasajeros=tk.IntVar()
+
+        self.entry3=tk.Entry(self.wind, width=20, textvariable=self.pasajeros)
+        self.entry3.grid(column=0, row=5)
+
+
+        self.label4=tk.Label(self.wind,text="Ingrese la cantidad de individuos de la poblacion:")
+        self.label4.grid(column=2, row=1)
+        self.c_poblacion=tk.IntVar()
+
+        self.entry4=tk.Entry(self.wind, width=20, textvariable=self.c_poblacion)
+        self.entry4.grid(column=2, row=2)
+
+
+        self.label5=tk.Label(self.wind,text="Ingrese la cantidad de veces que se muta el individuo:")
+        self.label5.grid(column=2, row=3)
+        self.n_mutacion=tk.IntVar()
+
+        self.entry5=tk.Entry(self.wind, width=20, textvariable=self.n_mutacion)
+        self.entry5.grid(column=2, row=4)
+
+
+        self.label6=tk.Label(self.wind,text="Ingrese la probabilidad de mutacion:")
+        self.label6.grid(column=2, row=5)
+        self.prob_mutacion=tk.IntVar()
+
+        self.entry6=tk.Entry(self.wind, width=20, textvariable=self.prob_mutacion)
+        self.entry6.grid(column=2, row=6)
+
         self.boton=tk.Button(self.wind, text="Aplicar", command=self.ingresar_generaciones)
-        self.boton.grid(column=0, row=4)
-        self.boton.config(command=self.ingresar_fila)
+        self.boton.grid(column=1, row=12)
         self.boton.config(command=self.aplicar_datos)
 
         self.wind.mainloop()
     
+
+    def get_prob_mutacion(self):
+        prob_mutacion = self.prob_mutacion.get()
+        return prob_mutacion
+    def get_n_mutacion(self):
+        n_mutaciones = self.n_mutacion.get()
+        return n_mutaciones
+    def get_cantidad_poblacion(self):
+        cantidad_poblacion = int(self.c_poblacion.get())
+        return cantidad_poblacion
+    def ingresar_cantidad_pasajeros_abordar(self):
+        pasajeros=int(self.pasajeros.get())
+        return pasajeros
     def ingresar_generaciones(self):
         generaciones = int(self.generaciones.get())
         return generaciones
@@ -279,17 +322,18 @@ if __name__ == '__main__':
     entrada= Interfaz(window)
     n_filas = entrada.ingresar_fila()
     numero_pasajeros_max = 4*n_filas
-    numero_pasajeros= round(random.uniform(1,4*n_filas))
-    print(numero_pasajeros)
-    numero_generaciones=5
+    numero_pasajeros= entrada.ingresar_cantidad_pasajeros_abordar()
+    tamanio_poblacion=entrada.get_cantidad_poblacion()
     numero_generaciones = entrada.ingresar_generaciones()
+    n_mutaciones=entrada.get_n_mutacion()
+    prob_muta=entrada.get_prob_mutacion()
     separacion_asientos = 50
     # Se calcula tomando en cuenta la distancia entre pajeros (asientos)
-    tamaño_asiento = 80
+    tamanio_asiento = 80
     pasajeros = crear_pasajeros(numero_pasajeros,numero_pasajeros_max)
     for pasajero in pasajeros:
         print(pasajero)
     print(f'Filas: {n_filas}\nGeneraciones: {numero_generaciones}')
     AG = AlgoritmoGenetico(pasajeros, numero_pasajeros_max, numero_generaciones,
-                           tamaño_asiento, n_filas, separacion_asientos)
+                           tamanio_asiento, n_filas, separacion_asientos,tamanio_poblacion,n_mutaciones,prob_muta)
     generar_grafica(AG)
