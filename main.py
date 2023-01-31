@@ -27,6 +27,7 @@ class AlgoritmoGenetico:
         self.nueva_poblacion = []
         self.mejor_individuo = []
         self.peor_individuo = []
+        self.media_individuo=[]
         self.primera_gen()
         self.bucle_algoritmo()
 
@@ -60,6 +61,7 @@ class AlgoritmoGenetico:
             self.graficar_individuos(aux+1)
             self.poda()
             self.mejor_individuo.append(self.poblacion[0])
+            self.media_individuo.append(self.poblacion[round(self.tamanio_poblacion/2)])
             self.peor_individuo.append(self.poblacion[self.tamanio_poblacion-1])
             print(f'Mejor individuo: {self.poblacion[0]}')
             print(f'Peor individuo: {self.poblacion[self.tamanio_poblacion-1]}')
@@ -304,6 +306,9 @@ def generar_grafica(algoritmo):
     list_epocas = []
     list_mejores_aptitud = []
     list_peores_aptitud = []
+    list_media_aptitud=[]
+    for x in algoritmo.media_individuo:
+        list_media_aptitud.append(x.get('aptitud'))
     for k in algoritmo.mejor_individuo:
         list_mejores_aptitud.append(k.get('aptitud'))
     for j in algoritmo.peor_individuo:
@@ -312,6 +317,7 @@ def generar_grafica(algoritmo):
         list_epocas.append(i+1)  
     fig, ax = plt.subplots()
     ax.plot(list_epocas, list_mejores_aptitud,label='Mejores Aptitud')
+    ax.plot(list_epocas, list_media_aptitud,label='Aptitud Media')
     ax.plot(list_epocas, list_peores_aptitud, color='red',label='Peores Aptitud')
     ax.legend(loc='upper right')
     plt.show()  
