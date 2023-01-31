@@ -237,43 +237,57 @@ class Interfaz:
         self.entry1=tk.Entry(self.wind, width=20, textvariable=self.filas)
         self.entry1.grid(column=0, row=1)
 
+        self.label7=tk.Label(self.wind,text="Ingrese la media de masa para los pasajeros:")
+        self.label7.grid(column=0, row=2)
+        self.media=tk.IntVar()
+
+        self.entry7=tk.Entry(self.wind, width=20, textvariable=self.media)
+        self.entry7.grid(column=0, row=3)
+
+        self.label8=tk.Label(self.wind,text="Ingrese la desviacion estandar de masa para los pasajeros:")
+        self.label8.grid(column=0, row=4)
+        self.desviacion_estandar=tk.IntVar()
+
+        self.entry8=tk.Entry(self.wind, width=20, textvariable=self.desviacion_estandar)
+        self.entry8.grid(column=0, row=5)
+
         self.label2=tk.Label(self.wind,text="Ingrese la cantidad de generaciones a crear:")
-        self.label2.grid(column=0, row=2)
+        self.label2.grid(column=0, row=6)
         self.generaciones=tk.IntVar()
 
         self.entry2=tk.Entry(self.wind, width=20, textvariable=self.generaciones)
-        self.entry2.grid(column=0, row=3)
+        self.entry2.grid(column=0, row=7)
 
         self.label3=tk.Label(self.wind,text="Ingrese la cantidad de pasajeros a abordar :")
-        self.label3.grid(column=0, row=4)
+        self.label3.grid(column=2, row=0)
         self.pasajeros=tk.IntVar()
 
         self.entry3=tk.Entry(self.wind, width=20, textvariable=self.pasajeros)
-        self.entry3.grid(column=0, row=5)
+        self.entry3.grid(column=2, row=1)
 
 
         self.label4=tk.Label(self.wind,text="Ingrese la cantidad de individuos de la poblacion:")
-        self.label4.grid(column=2, row=1)
+        self.label4.grid(column=2, row=2)
         self.c_poblacion=tk.IntVar()
 
         self.entry4=tk.Entry(self.wind, width=20, textvariable=self.c_poblacion)
-        self.entry4.grid(column=2, row=2)
+        self.entry4.grid(column=2, row=3)
 
 
         self.label5=tk.Label(self.wind,text="Ingrese la cantidad de veces que se muta el individuo:")
-        self.label5.grid(column=2, row=3)
+        self.label5.grid(column=2, row=4)
         self.n_mutacion=tk.IntVar()
 
         self.entry5=tk.Entry(self.wind, width=20, textvariable=self.n_mutacion)
-        self.entry5.grid(column=2, row=4)
+        self.entry5.grid(column=2, row=5)
 
 
         self.label6=tk.Label(self.wind,text="Ingrese la probabilidad de mutacion:")
-        self.label6.grid(column=2, row=5)
+        self.label6.grid(column=2, row=6)
         self.prob_mutacion=tk.IntVar()
 
         self.entry6=tk.Entry(self.wind, width=20, textvariable=self.prob_mutacion)
-        self.entry6.grid(column=2, row=6)
+        self.entry6.grid(column=2, row=7)
 
         self.boton=tk.Button(self.wind, text="Aplicar", command=self.ingresar_generaciones)
         self.boton.grid(column=1, row=12)
@@ -281,7 +295,10 @@ class Interfaz:
 
         self.wind.mainloop()
     
-
+    def get_desviacion_estandar(self):
+        return self.desviacion_estandar
+    def get_media(self):
+        return self.media
     def get_prob_mutacion(self):
         prob_mutacion = self.prob_mutacion.get()
         return prob_mutacion
@@ -336,7 +353,9 @@ if __name__ == '__main__':
     separacion_asientos = 50
     # Se calcula tomando en cuenta la distancia entre pajeros (asientos)
     tamanio_asiento = 80
-    pasajeros = crear_pasajeros(numero_pasajeros,numero_pasajeros_max)
+    media= entrada.get_media().get()
+    desviacion_estandar=entrada.get_desviacion_estandar().get()
+    pasajeros = crear_pasajeros(numero_pasajeros,numero_pasajeros_max,media,desviacion_estandar)
     for pasajero in pasajeros:
         print(pasajero)
     print(f'Filas: {n_filas}\nGeneraciones: {numero_generaciones}')
