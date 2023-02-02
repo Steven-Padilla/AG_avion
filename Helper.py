@@ -1,11 +1,11 @@
 from Pasajero import Pasajero
 import random
 
-def crear_pasajeros(n_pasajeros,n_pasajeros_max):
+def crear_pasajeros(n_pasajeros,n_pasajeros_max,media, desviacion_standar):
     pasajeros=[]
     i=0
     for _ in range(n_pasajeros):
-        pasajeros.append(Pasajero(i+1,round(random.normalvariate(65,10),1)))
+        pasajeros.append(Pasajero(i+1,round(random.normalvariate(media,desviacion_standar),1)))
         i+=1
     for _ in range(n_pasajeros_max-n_pasajeros):
         pasajeros.append(Pasajero(i+1,0))
