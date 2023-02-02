@@ -1,13 +1,15 @@
 from Helper import crear_pasajeros, generar_rango_cruza, arr_numeros, llenar_resultado,calcular_data_lista_y,calcular_data_lista_x
 import random
 import tkinter as tk
+from tkinter import messagebox 
 import math
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
 
 
 class AlgoritmoGenetico:
-    def __init__(self, pasajeros, n_individuos, n_generaciones, tamanio_asiento, n_filas, separacion_entre_asientos,tamanio_poblacion,n_mutaciones,prob_muta):
+    def __init__(self, pasajeros, n_individuos, n_generaciones, tamanio_asiento, n_filas, separacion_entre_asientos,tamanio_poblacion,n_mutaciones,prob_muta,prob_mutacion_gen):
         # Variables que se pueden modificar
         self.pasajeros = pasajeros
         self.n_individuos = n_individuos
@@ -18,7 +20,7 @@ class AlgoritmoGenetico:
         self.tamanio_poblacion=tamanio_poblacion
         self.n_mutaciones = n_mutaciones
         self.prob_mutacion=prob_muta
-        self.k = 3
+        self.prob_mutacion_gen=prob_mutacion_gen
         self.lista_data_x=calcular_data_lista_x(self.n_filas)
         self.lista_data_y=calcular_data_lista_y(self.n_filas)
         self.id_indiv = 1
@@ -94,14 +96,12 @@ class AlgoritmoGenetico:
         plt.scatter(x,y,label=f'Centro de masa({self.x_centro},{self.y_centro})',marker='x')
         x=np.array(arr_x)
         y=np.array(arr_y)
-        plt.scatter(x,y,label='Individuos',marker='o')
+        plt.scatter(x,y,label='Individuos',marker='.')
         aux.set_title(f'Individuos en generacion: {n_generacion}',fontdict={'fontsize':20,'fontweight':'bold'})
         aux.set_xlabel('X',fontdict={'fontsize':15,'fontweight':'bold', 'color':'tab:red'})
         aux.set_ylabel('Y',fontdict={'fontsize':15,'fontweight':'bold', 'color':'tab:blue'})
         aux.set_xlim(140,240)
         aux.set_ylim(100,240)
-        # aux.set_xlim(0,(self.tamanio_asiento*4)+self.separacion_asientos)
-        # aux.set_ylim(0,(self.tamanio_asiento*self.n_filas))
         aux.legend(loc='upper right',prop={'size':10})
         plt.grid()
         plt.savefig(f'./images/generacion_{self.generacion}')
@@ -140,11 +140,12 @@ class AlgoritmoGenetico:
     def mutacion(self, nueva_poblacion):
         # print("Poblacion iniciales: ", self.poblacion)
         for index, individuo in enumerate(nueva_poblacion):
-            if random.uniform(0,1) < self.prob_mutacion:
+            if random.uniform(0,1) <= self.prob_mutacion:
                 for _ in range(self.n_mutaciones):
-                    a, b = random.choices(self.cant_genes, k=2)
-                    individuo.get('data')[a], individuo.get('data')[
-                        b] = individuo.get('data')[b], individuo.get('data')[a]
+                    if random.uniform(0,1) <= self.prob_mutacion_gen:
+                        a, b = random.choices(self.cant_genes, k=2)
+                        individuo.get('data')[a], individuo.get('data')[
+                            b] = individuo.get('data')[b], individuo.get('data')[a]
         # print("Poblacion Mutada: ", self.poblacion)
 
     def cruza(self, indiv1, indiv2):
@@ -263,6 +264,13 @@ class Interfaz:
         self.entry2=tk.Entry(self.wind, width=20, textvariable=self.generaciones)
         self.entry2.grid(column=0, row=7)
 
+        self.label2=tk.Label(self.wind,text="Probabilidad de mutación del gen:")
+        self.label2.grid(column=0, row=8)
+        self.prob_muta_gen=tk.IntVar()
+
+        self.entry2=tk.Entry(self.wind, width=20, textvariable=self.prob_muta_gen)
+        self.entry2.grid(column=0, row=9)
+
         self.label3=tk.Label(self.wind,text="Ingrese la cantidad de pasajeros a abordar :")
         self.label3.grid(column=2, row=0)
         self.pasajeros=tk.IntVar()
@@ -294,12 +302,23 @@ class Interfaz:
         self.entry6=tk.Entry(self.wind, width=20, textvariable=self.prob_mutacion)
         self.entry6.grid(column=2, row=7)
 
+        self.label7=tk.Label(self.wind,text="Ingrese el tamaño del pasillo:")
+        self.label7.grid(column=2, row=8)
+        self.tamanio_pasillo=tk.IntVar()
+
+        self.entry7=tk.Entry(self.wind, width=20, textvariable=self.tamanio_pasillo)
+        self.entry7.grid(column=2, row=9)
+
         self.boton=tk.Button(self.wind, text="Aplicar", command=self.ingresar_generaciones)
         self.boton.grid(column=1, row=12)
         self.boton.config(command=self.aplicar_datos)
 
         self.wind.mainloop()
     
+    def get_prob_muta_gen(self):
+        return self.prob_muta_gen.get()
+    def get_tamanio_pasillo(self):
+        return self.tamanio_pasillo.get()
     def get_desviacion_estandar(self):
         return self.desviacion_estandar
     def get_media(self):
@@ -313,7 +332,7 @@ class Interfaz:
     def get_cantidad_poblacion(self):
         cantidad_poblacion = int(self.c_poblacion.get())
         return cantidad_poblacion
-    def ingresar_cantidad_pasajeros_abordar(self):
+    def ingresar_cantidad_pasajeros_abordar(self):    
         pasajeros=int(self.pasajeros.get())
         return pasajeros
     def ingresar_generaciones(self):
@@ -323,7 +342,11 @@ class Interfaz:
         fila = int(self.filas.get())
         return fila
     def aplicar_datos(self):
-        self.wind.destroy()
+        if self.pasajeros.get() > (self.filas.get()*4):
+            messagebox.showerror("Error", "La cantidad de pasajeros no puede ser mayor al numero de asientos")
+            sys.exit(1)
+        else:
+            self.wind.destroy()
 def generar_grafica(algoritmo):
     list_epocas = []
     list_mejores_aptitud = []
@@ -355,7 +378,8 @@ if __name__ == '__main__':
     numero_generaciones = entrada.ingresar_generaciones()
     n_mutaciones=entrada.get_n_mutacion()
     prob_muta=entrada.get_prob_mutacion()
-    separacion_asientos = 50
+    separacion_asientos = entrada.get_tamanio_pasillo()
+    prob_mutacion_gen=entrada.get_prob_muta_gen()
     # Se calcula tomando en cuenta la distancia entre pajeros (asientos)
     tamanio_asiento = 80
     media= entrada.get_media().get()
@@ -365,5 +389,5 @@ if __name__ == '__main__':
         print(pasajero)
     print(f'Filas: {n_filas}\nGeneraciones: {numero_generaciones}')
     AG = AlgoritmoGenetico(pasajeros, numero_pasajeros_max, numero_generaciones,
-                           tamanio_asiento, n_filas, separacion_asientos,tamanio_poblacion,n_mutaciones,prob_muta)
+                           tamanio_asiento, n_filas, separacion_asientos,tamanio_poblacion,n_mutaciones,prob_muta,prob_mutacion_gen)
     generar_grafica(AG)
